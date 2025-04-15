@@ -1,27 +1,20 @@
-class Question {
-  final String questionText;
-  final String correctAnswer;
-  final List<String> incorrectAnswers;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../models/question.dart';  // Import Question from models/
 
-  Question({
-    required this.questionText,
-    required this.correctAnswer,
-    required this.incorrectAnswers,
-  });
-
-  // Convert JSON from API => Question object
-  factory Question.fromJson(Map<String, dynamic> json) {
-    return Question(
-      questionText: json['question'],
-      correctAnswer: json['correct_answer'],
-      incorrectAnswers: List<String>.from(json['incorrect_answers']),
+class ApiService {
+  static Future<List<Question>> fetchQuestions() async {
+    final response = await http.get(
+      Uri.parse('https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&type=multiple'),
     );
-  }
 
-  // Shuffle all answers (correct + incorrect)
-  List<String> getShuffledAnswers() {
-    final allAnswers = [...incorrectAnswers, correctAnswer];
-    allAnswers.shuffle(); // Randomize order
-    return allAnswers;
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['results'] as List)
+          .map((questionData) => Question.fromJson(questionData))
+          .toList();
+    } else {
+      throw Exception('Failed to load questions');
+    }
   }
 }

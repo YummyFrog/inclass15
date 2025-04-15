@@ -1,24 +1,25 @@
 class Question {
-  final String question;
-  final List<String> options;
+  final String questionText;
   final String correctAnswer;
+  final List<String> incorrectAnswers;
 
   Question({
-    required this.question,
-    required this.options,
+    required this.questionText,
     required this.correctAnswer,
+    required this.incorrectAnswers,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    // Combine incorrect + correct answers, then shuffle
-    List<String> options = List<String>.from(json['incorrect_answers']);
-    options.add(json['correct_answer']);
-    options.shuffle();
-
     return Question(
-      question: json['question'],
-      options: options,
+      questionText: json['question'],
       correctAnswer: json['correct_answer'],
+      incorrectAnswers: List<String>.from(json['incorrect_answers']),
     );
+  }
+
+  List<String> getShuffledAnswers() {
+    final allAnswers = [...incorrectAnswers, correctAnswer];
+    allAnswers.shuffle();
+    return allAnswers;
   }
 }

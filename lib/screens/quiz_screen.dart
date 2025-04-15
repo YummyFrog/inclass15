@@ -8,7 +8,7 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  List<Question> _questions = [];
+  List<Question> _questions = [];  // Fixed: Removed 'model.' prefix
   int _currentQuestionIndex = 0;
   int _score = 0;
   bool _loading = true;
@@ -31,7 +31,12 @@ class _QuizScreenState extends State<QuizScreen> {
       });
     } catch (e) {
       print(e);
-      // Handle error appropriately
+      setState(() {
+        _loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load questions: $e")),
+      );
     }
   }
 
@@ -63,7 +68,7 @@ class _QuizScreenState extends State<QuizScreen> {
       onPressed: _answered ? null : () => _submitAnswer(option),
       child: Text(option),
       style: ElevatedButton.styleFrom(
-        primary: _answered
+        backgroundColor: _answered  // Changed from 'primary' to 'backgroundColor'
             ? (option == _questions[_currentQuestionIndex].correctAnswer
                 ? Colors.green
                 : option == _selectedAnswer
@@ -107,11 +112,11 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              question.question,
+              question.questionText,  // Changed from 'question' to 'questionText'
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 16),
-            ...question.options.map((option) => _buildOptionButton(option)),
+            ...question.getShuffledAnswers().map((option) => _buildOptionButton(option)),  // Using getShuffledAnswers()
             SizedBox(height: 20),
             if (_answered)
               Text(
